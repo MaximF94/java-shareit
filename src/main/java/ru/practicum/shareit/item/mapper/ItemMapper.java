@@ -26,7 +26,7 @@ public class ItemMapper {
                 null
         );
     }
-    
+
     public static Collection<ItemDto> map(Collection<Item> items) {
         return items.stream()
                 .map(ItemMapper::map)
