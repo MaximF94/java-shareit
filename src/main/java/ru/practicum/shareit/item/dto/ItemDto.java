@@ -5,11 +5,11 @@ import lombok.Data;
 
 @Data
 public class ItemDto {
-    Long id;
-    String name;
-    String description;
-    Boolean available;
-    Long requestId;
+    private Long id;
+    private String name;
+    private String description;
+    private Boolean available;
+    private Long requestId;
 
     public ItemDto(Long id, String name, String description, Boolean available, Long requestId) {
         this.id = id;

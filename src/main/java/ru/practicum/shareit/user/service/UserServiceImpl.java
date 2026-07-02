@@ -4,8 +4,11 @@ import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exeption.DuplicateEmailException;
 import ru.practicum.shareit.exeption.NotFoundException;
 import ru.practicum.shareit.exeption.ValidationException;
+import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -21,62 +24,65 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User getUser(Long id) {
-        return userRepository.findById(id).orElseThrow(() -> {
+    public UserDto getUser(Long id) {
+        User user = userRepository.findById(id).orElseThrow(() -> {
             return new NotFoundException("Пользователь не найден");
         });
+
+        return UserMapper.map(user);
     }
 
     @Override
-    public Collection<User> getAllUsers() {
-        return userRepository.findAll();
+    public Collection<UserDto> getAllUsers() {
+        Collection<User> users = userRepository.findAll();
+        return UserMapper.map(users);
     }
 
     @Override
-    public User createUser(User user) {
-        Set<String> errors = validate(user);
-        if (!errors.isEmpty()) {
-            throw new ValidationException(String.join(", ", errors));
-        }
+    public UserDto createUser(UserDto userDto) {
+
+        User user = UserMapper.map(userDto);
+
+        validate(user);
 
         checkEmailUniqueness(user.getEmail(), null);
 
-        return userRepository.save(user);
+        User createdUser = userRepository.save(user);
+
+        return UserMapper.map(createdUser);
+
     }
 
     @Override
-    public User updateUser(User user) {
+    public UserDto updateUser(UserDto userDto, Long id) {
+
+        userDto.setId(id);
+
+        User user = UserMapper.map(userDto);
 
         if (user.getId() == null || user.getId() == 0) {
             throw new ValidationException("Id должен быть указан");
         }
 
-        User existingUser = userRepository.findById(user.getId())
-                .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
+        User existingUser = findExistingUser(user);
 
 
-        String oldEmail = existingUser.getEmail();
-        String oldName = existingUser.getName();
+        User userToValidate = new User();
+        userToValidate.setId(existingUser.getId());
+        userToValidate.setName(user.getName() != null ? user.getName() : existingUser.getName());
+        userToValidate.setEmail(user.getEmail() != null ? user.getEmail() : existingUser.getEmail());
 
-        try {
-            updateUserFields(existingUser, user);
+        validate(userToValidate);
 
-            Set<String> errors = validate(existingUser);
-            if (!errors.isEmpty()) {
-                throw new ValidationException(String.join(", ", errors));
-            }
-
-            if (!oldEmail.equals(existingUser.getEmail())) {
-                checkEmailUniqueness(existingUser.getEmail(), user.getId());
-            }
-
-            return userRepository.save(existingUser);
-
-        } catch (Exception e) {
-            existingUser.setEmail(oldEmail);
-            existingUser.setName(oldName);
-            throw e;
+        if (user.getEmail() != null && !existingUser.getEmail().equals(user.getEmail())) {
+            checkEmailUniqueness(user.getEmail(), user.getId());
         }
+
+        updateUserFields(existingUser, user);
+
+        User updatedUser = userRepository.update(existingUser);
+
+        return UserMapper.map(updatedUser);
     }
 
     @Override
@@ -92,17 +98,17 @@ public class UserServiceImpl implements UserService {
 
     private void updateUserFields(User oldUser, User newUser) {
 
-        if (!(newUser.getEmail() == null)) {
+        if (newUser.getEmail() != null) {
             oldUser.setEmail(newUser.getEmail());
         }
 
-        if (!(newUser.getName() == null)) {
+        if (newUser.getName() != null) {
             oldUser.setName(newUser.getName());
         }
 
     }
 
-    private Set<String> validate(User user) {
+    private Set<String> checkDataField(User user) {
 
         Set<String> errors = new HashSet<>();
 
@@ -124,17 +130,24 @@ public class UserServiceImpl implements UserService {
         return email.contains("@");
     }
 
-    private void checkEmailUniqueness(String email, Long excludeId) {
-        boolean emailExists = userRepository.findAll().stream()
-                .anyMatch(u -> {
-                    if (excludeId != null && u.getId().equals(excludeId)) {
-                        return false;
-                    }
-                    return u.getEmail().equals(email);
-                });
+    private User findExistingUser(User user) {
+        return userRepository.findById(user.getId())
+                .orElseThrow(() -> new NotFoundException("Пользователь с id " + user.getId() + " не найден"));
+    }
 
-        if (emailExists) {
-            throw new DuplicateEmailException("Пользователь с email '" + email + "' уже существует");
+    private void validate(User user) {
+        Set<String> errors = checkDataField(user);
+        if (!errors.isEmpty()) {
+            throw new ValidationException(String.join(", ", errors));
         }
+    }
+
+    private void checkEmailUniqueness(String email, Long excludeId) {
+        userRepository.findByEmail(email)
+                .ifPresent(existingUser -> {
+                    if (!existingUser.getId().equals(excludeId)) {
+                        throw new DuplicateEmailException("Пользователь с email '" + email + "' уже существует");
+                    }
+                });
     }
 }

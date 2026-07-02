@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 public class InMemoryItemRepository implements ItemRepository {
 
     private final Map<Long, Item> items = new HashMap<>();
+    private long nextId = 1;
 
     @Override
     public Optional<Item> findById(Long id) {
@@ -19,7 +20,7 @@ public class InMemoryItemRepository implements ItemRepository {
     @Override
     public Item save(Item item) {
         if (item.getId() == null || item.getId() == 0) {
-           item.setId(getNextId());
+           item.setId(nextId++);
         }
 
         items.put(item.getId(),item);
@@ -55,14 +56,5 @@ public class InMemoryItemRepository implements ItemRepository {
         if (itemId != 0) {
             items.remove(itemId);
         }
-    }
-
-    private long getNextId() {
-        long maxId = items.keySet()
-                .stream()
-                .mapToLong(id -> id)
-                .max()
-                .orElse(0);
-        return ++maxId;
     }
 }

@@ -15,6 +15,8 @@ import java.util.Collections;
 @RequestMapping("/items")
 public class ItemController {
 
+    private static final String USER_ID_HEADER = "X-Sharer-User-Id";
+
     ItemService itemService;
 
     public ItemController(ItemService itemService) {
@@ -23,48 +25,34 @@ public class ItemController {
 
     @GetMapping("/{itemId}")
     public ResponseEntity<ItemDto> getItem(@PathVariable long itemId) {
-        Item item = itemService.getItem(itemId);
-        ItemDto itemDto = ItemMapper.map(item);
-        return ResponseEntity.ok(itemDto);
+        return ResponseEntity.ok(itemService.getItem(itemId));
     }
 
     @GetMapping
-    public ResponseEntity<Collection<ItemDto>> getAll(@RequestHeader("X-Sharer-User-Id") Long ownerId) {
-        Collection<Item> items = itemService.getAllItemsFromUser(ownerId);
-        Collection<ItemDto> dtos = ItemMapper.map(items);
-        return ResponseEntity.ok(dtos);
+    public ResponseEntity<Collection<ItemDto>> getAll(@RequestHeader(USER_ID_HEADER) Long ownerId) {
+        return ResponseEntity.ok(itemService.getAllItemsFromUser(ownerId));
     }
 
     @GetMapping("/search")
     public ResponseEntity<Collection<ItemDto>> searchItems(
             @RequestParam String text) {
 
-        if (text == null || text.isBlank()) {
-            return ResponseEntity.ok(Collections.emptyList());
-        }
-
-        Collection<Item> items = itemService.searchItems(text);
-        Collection<ItemDto> dtos = ItemMapper.map(items);
-        return ResponseEntity.ok(dtos);
+        return ResponseEntity.ok(itemService.searchItems(text));
     }
 
     @PostMapping
     public ResponseEntity<ItemDto> createItem(@RequestBody ItemDto dto,
-                                              @RequestHeader("X-Sharer-User-Id") Long ownerId) {
-        Item item = ItemMapper.map(dto);
-        Item createdItem = itemService.createItem(item, ownerId);
-        ItemDto createdItemDto = ItemMapper.map(createdItem);
-        return ResponseEntity.ok(createdItemDto);
+                                              @RequestHeader(USER_ID_HEADER) Long ownerId) {
+
+        return ResponseEntity.ok(itemService.createItem(dto, ownerId));
     }
 
     @PatchMapping("/{itemId}")
     public ResponseEntity<ItemDto> update(@PathVariable Long itemId,
                                           @RequestBody ItemDto dto,
-                                          @RequestHeader("X-Sharer-User-Id") Long ownerId) {
-        dto.setId(itemId);
-        Item updatedItem = itemService.updateItem(ItemMapper.map(dto), ownerId);
-        ItemDto updatedItemDto = ItemMapper.map(updatedItem);
-        return ResponseEntity.ok(updatedItemDto);
+                                          @RequestHeader(USER_ID_HEADER) Long ownerId) {
+
+        return ResponseEntity.ok(itemService.updateItem(dto, itemId, ownerId));
     }
 
     @DeleteMapping("/{itemId}")

@@ -4,12 +4,12 @@ import lombok.Data;
 
 @Data
 public class Item {
-    Long id;
-    String name;
-    String description;
-    Boolean available;
-    Long owner;
-    Long requestId;
+    private Long id;
+    private String name;
+    private String description;
+    private Boolean available;
+    private Long owner;
+    private Long requestId;
 
     public Item(Long id, String name, String description, Boolean available, Long owner, Long requestId) {
         this.id = id;

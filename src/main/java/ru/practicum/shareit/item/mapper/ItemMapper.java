@@ -26,19 +26,7 @@ public class ItemMapper {
                 null
         );
     }
-
-    public static void updateFields(ItemDto dto, Item item) {
-        if (dto.getName() != null) {
-            item.setName(dto.getName());
-        }
-        if (dto.getDescription() != null) {
-            item.setDescription(dto.getDescription());
-        }
-        if (dto.getAvailable() != null) {
-            item.setAvailable(dto.getAvailable());
-        }
-    }
-
+    
     public static Collection<ItemDto> map(Collection<Item> items) {
         return items.stream()
                 .map(ItemMapper::map)
