@@ -1,6 +1,5 @@
 package ru.practicum.shareit.item.service;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exeption.AccessDeniedException;
 import ru.practicum.shareit.exeption.NotFoundException;
