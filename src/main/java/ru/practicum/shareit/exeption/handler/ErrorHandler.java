@@ -4,10 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.practicum.shareit.exeption.AccessDeniedException;
-import ru.practicum.shareit.exeption.DuplicateEmailException;
-import ru.practicum.shareit.exeption.NotFoundException;
-import ru.practicum.shareit.exeption.ValidationException;
+import ru.practicum.shareit.exeption.*;
 
 @RestControllerAdvice
 public class ErrorHandler {
@@ -43,6 +40,24 @@ public class ErrorHandler {
     public ErrorResponse handleAccessDenied(final AccessDeniedException e) {
         return new ErrorResponse(
                 "Несанкционированное редактирование",
+                e.getMessage()
+        );
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorResponse handleAccessDeniedForBooking(final AccessDeniedExceptionForBooking e) {
+        return new ErrorResponse(
+                "Несанкционированный доступ",
+                e.getMessage()
+        );
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleIllegalArgumentException(final IllegalArgumentException e) {
+        return new ErrorResponse(
+                "Некорректный запрос",
                 e.getMessage()
         );
     }

@@ -80,14 +80,14 @@ public class UserServiceImpl implements UserService {
 
         updateUserFields(existingUser, user);
 
-        User updatedUser = userRepository.update(existingUser);
+        User updatedUser = userRepository.save(existingUser);
 
         return UserMapper.map(updatedUser);
     }
 
     @Override
     public void deleteUser(Long userId) {
-        userRepository.deleteUser(userId);
+        userRepository.deleteById(userId);
     }
 
     public User findUser(Long id) {

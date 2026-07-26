@@ -2,6 +2,7 @@ package ru.practicum.shareit.item;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 
@@ -55,5 +56,13 @@ public class ItemController {
     @DeleteMapping("/{itemId}")
     public void delete(@PathVariable Long itemId) {
         itemService.deleteItem(itemId);
+    }
+
+    @PostMapping("/{itemId}/comment")
+    public ResponseEntity<CommentDto> addComment(@PathVariable Long itemId,
+                                                 @RequestBody CommentDto dto,
+                                                 @RequestHeader(USER_ID_HEADER) Long userId) {
+
+        return ResponseEntity.ok(itemService.createComment(dto, itemId, userId));
     }
 }
