@@ -85,6 +85,7 @@ public class ItemServiceImpl implements ItemService {
             item.setComments(commentsMap.get(item.getId()));
 
             ItemDto dto = ItemMapper.mapWithDates(item, lastDate, nextDate);
+            
             itemDtos.add(dto);
         }
 
