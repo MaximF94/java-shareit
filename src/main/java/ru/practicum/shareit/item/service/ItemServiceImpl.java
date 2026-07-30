@@ -85,6 +85,7 @@ public class ItemServiceImpl implements ItemService {
             ItemDto dto = ItemMapper.mapWithDates(item, lastDate, nextDate);
             itemDtos.add(dto);
         }
+
         return itemDtos;
     }
 
