@@ -7,7 +7,6 @@ import ru.practicum.shareit.booking.model.Booking;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
@@ -116,17 +115,17 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "AND b.end < CURRENT_TIMESTAMP")
     List<Booking> findCompletedBookingsByUserAndItem(Long userId, Long itemId);
 
-    @Query("SELECT b FROM Booking b " +
-            "WHERE b.item.id = :itemId " +
+    @Query("SELECT b.item.id, MAX(b.end) FROM Booking b " +
+            "WHERE b.item.id IN :itemIds " +
             "AND b.status = 'APPROVED' " +
             "AND b.end < CURRENT_TIMESTAMP " +
-            "ORDER BY b.end DESC")
-    Optional<Booking> findLastBookingByItemId(Long itemId);
+            "GROUP BY b.item.id")
+    List<Object[]> findLastBookingEndsForItems(List<Long> itemIds);
 
-    @Query("SELECT b FROM Booking b " +
-            "WHERE b.item.id = :itemId " +
+    @Query("SELECT b.item.id, MIN(b.start) FROM Booking b " +
+            "WHERE b.item.id IN :itemIds " +
             "AND b.status = 'APPROVED' " +
             "AND b.start > CURRENT_TIMESTAMP " +
-            "ORDER BY b.start ASC")
-    Optional<Booking> findNextBookingByItemId(Long itemId);
+            "GROUP BY b.item.id")
+    List<Object[]> findNextBookingStartsForItems(List<Long> itemIds);
 }

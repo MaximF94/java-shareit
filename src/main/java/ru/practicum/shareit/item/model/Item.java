@@ -1,12 +1,12 @@
 package ru.practicum.shareit.item.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @Entity
 @Table(name = "items")
@@ -32,6 +32,8 @@ public class Item {
     private Long requestId;
 
     @OneToMany(mappedBy = "item", cascade = CascadeType.ALL)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private List<Comment> comments;
 
     public Item(Long id, String name, String description, Boolean available, Long owner, Long requestId) {

@@ -192,6 +192,10 @@ public class BookingServiceImpl implements BookingService {
             throw new IllegalArgumentException("Дата начала должна быть в будущем");
         }
 
+        if(booking.getEnd().isBefore(booking.getStart())) {
+            throw new IllegalArgumentException("Дата окончания не может быть раньше даты начала");
+        }
+
     }
 
 }

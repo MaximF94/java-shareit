@@ -51,20 +51,40 @@ public class ItemServiceImpl implements ItemService {
 
         Collection<Item> items = itemRepository.findAllByOwner(ownerId);
 
+        List<Long> itemIds = items.stream()
+                .map(Item::getId)
+                .toList();
+
+        List<Object[]> lastResults = bookingRepository.findLastBookingEndsForItems(itemIds);
+        Map<Long, LocalDateTime> lastMap = new HashMap<>();
+        for (Object[] row : lastResults) {
+            lastMap.put((Long) row[0], (LocalDateTime) row[1]);
+        }
+
+        List<Object[]> nextResults = bookingRepository.findNextBookingStartsForItems(itemIds);
+        Map<Long, LocalDateTime> nextMap = new HashMap<>();
+        for (Object[] row : nextResults) {
+            nextMap.put((Long) row[0], (LocalDateTime) row[1]);
+        }
+
+        List<Comment> comments = commentRepository.findAllWithAuthorByItemIds(itemIds);
+        Map<Long, List<Comment>> commentsMap = new HashMap<>();
+        for (Comment c : comments) {
+            Long itemId = c.getItem().getId();
+
+            List<Comment> list = commentsMap.computeIfAbsent(itemId, k -> new ArrayList<>());
+            list.add(c);
+        }
+
         Collection<ItemDto> itemDtos = new ArrayList<>();
 
         for (Item item : items) {
+            LocalDateTime lastDate = lastMap.get(item.getId());
+            LocalDateTime nextDate = nextMap.get(item.getId());
 
-            LocalDateTime lastDate = bookingRepository.findLastBookingByItemId(item.getId())
-                    .map(Booking::getEnd)
-                    .orElse(null);
-
-            LocalDateTime nextDate = bookingRepository.findNextBookingByItemId(item.getId())
-                    .map(Booking::getStart)
-                    .orElse(null);
+            item.setComments(commentsMap.get(item.getId()));
 
             ItemDto dto = ItemMapper.mapWithDates(item, lastDate, nextDate);
-
             itemDtos.add(dto);
         }
 
