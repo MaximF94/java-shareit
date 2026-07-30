@@ -51,9 +51,7 @@ public class ItemServiceImpl implements ItemService {
 
         Collection<Item> items = itemRepository.findAllByOwner(ownerId);
 
-        List<Long> itemIds = items.stream()
-                .map(Item::getId)
-                .toList();
+        List<Long> itemIds = items.stream().map(Item::getId).toList();
 
         List<Object[]> lastResults = bookingRepository.findLastBookingEndsForItems(itemIds);
         Map<Long, LocalDateTime> lastMap = new HashMap<>();
@@ -85,7 +83,6 @@ public class ItemServiceImpl implements ItemService {
             item.setComments(commentsMap.get(item.getId()));
 
             ItemDto dto = ItemMapper.mapWithDates(item, lastDate, nextDate);
-            
             itemDtos.add(dto);
         }
 
@@ -157,13 +154,10 @@ public class ItemServiceImpl implements ItemService {
             return new NotFoundException("Пользователь не найден");
         });
 
-        List<Booking> completedBookings = bookingRepository
-                .findCompletedBookingsByUserAndItem(userId, itemId);
+        List<Booking> completedBookings = bookingRepository.findCompletedBookingsByUserAndItem(userId, itemId);
 
         if (completedBookings.isEmpty()) {
-            throw new IllegalArgumentException(
-                    "Пользователь не арендовал эту вещь или срок аренды ещё не закончился"
-            );
+            throw new IllegalArgumentException("Пользователь не арендовал эту вещь или срок аренды ещё не закончился");
         }
 
         Comment comment = new Comment();
@@ -219,8 +213,7 @@ public class ItemServiceImpl implements ItemService {
 
     private Item findExistedItem(Item item) {
 
-        Item existingItem = itemRepository.findById(item.getId())
-                .orElseThrow(() -> new NotFoundException("Вещь не найдена"));
+        Item existingItem = itemRepository.findById(item.getId()).orElseThrow(() -> new NotFoundException("Вещь не найдена"));
 
         if (!Objects.equals(item.getOwner(), existingItem.getOwner())) {
             throw new AccessDeniedException("Несанкционированное редактирование вещи");
