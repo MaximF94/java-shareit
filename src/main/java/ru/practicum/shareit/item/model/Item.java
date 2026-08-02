@@ -1,15 +1,40 @@
 package ru.practicum.shareit.item.model;
 
-import lombok.Data;
+import jakarta.persistence.*;
+import lombok.*;
 
-@Data
+import java.util.List;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@Entity
+@Table(name = "items")
 public class Item {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "name")
     private String name;
+
+    @Column(name = "description")
     private String description;
+
+    @Column(name = "available")
     private Boolean available;
+
+    @Column(name = "owner")
     private Long owner;
+
+    @Column(name = "request_id")
     private Long requestId;
+
+    @OneToMany(mappedBy = "item", cascade = CascadeType.ALL)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private List<Comment> comments;
 
     public Item(Long id, String name, String description, Boolean available, Long owner, Long requestId) {
         this.id = id;
