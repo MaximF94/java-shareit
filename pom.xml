@@ -164,6 +164,13 @@
 					<version>0.8.12</version>
 					<configuration>
 						<output>file</output>
+                        <excludes>
+                            <exclude>**/dto/**</exclude>
+                            <exclude>**/model/**</exclude>
+                            <exclude>**/exception/**</exclude>
+                            <exclude>**/config/**</exclude>
+                            <exclude>**/*Application.class</exclude>
+                        </excludes>
 					</configuration>
 					<executions>
 						<execution>
