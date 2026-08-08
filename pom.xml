@@ -168,7 +168,7 @@
 					</configuration>
 					-->
                     <configuration>
-                        <skip>true</skip> 
+                        <skip>true</skip>
                     </configuration>
 					<executions>
 						<execution>
