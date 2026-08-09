@@ -43,9 +43,8 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemDto getItem(Long id) {
 
-        Item item = itemRepository.findById(id).orElseThrow(() -> {
-            return new NotFoundException("Вещь не найдена");
-        });
+        Item item = itemRepository.findByIdWithComments(id)
+                .orElseThrow(() -> new NotFoundException("Вещь не найдена"));
 
         return ItemMapper.map(item);
     }
@@ -99,8 +98,7 @@ public class ItemServiceImpl implements ItemService {
         if (text == null || text.isBlank()) {
             return Collections.emptyList();
         }
-
-        Collection<Item> items = itemRepository.searchItems(text);
+        Collection<Item> items = itemRepository.searchWithComments(text);
 
         return ItemMapper.map(items);
 
